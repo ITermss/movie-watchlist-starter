@@ -13,6 +13,7 @@ Route::prefix('auth')->group(function (): void {
 
 Route::get('/movies', [MovieController::class, 'index']);
 Route::get('/movies/{id}', [MovieController::class, 'show'])->whereNumber('id');
+Route::post('/movies/recommend', [MovieController::class, 'recommend'])->middleware('throttle:10,1');
 
 Route::middleware('auth:api')->group(function (): void {
     Route::get('/watchlist', [WatchlistController::class, 'index']);

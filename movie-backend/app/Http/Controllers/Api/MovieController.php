@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Movie\RecommendMovieRequest;
 use App\Http\Resources\MovieResource;
 use App\Models\Movie;
+use App\Services\GeminiRecommender;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
@@ -54,5 +57,15 @@ class MovieController extends Controller
         }
 
         return new MovieResource($movie);
+    }
+
+    /**
+     * Recommend a movie from the catalog using Gemini LLM.
+     */
+    public function recommend(RecommendMovieRequest $request, GeminiRecommender $recommender): JsonResponse
+    {
+        $result = $recommender->recommend((string) $request->validated('prompt'));
+
+        return response()->json($result);
     }
 }
