@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\MovieController;
+use App\Http\Controllers\Api\WatchedController;
 use App\Http\Controllers\Api\WatchlistController;
 use Illuminate\Support\Facades\Route;
 
@@ -17,4 +18,7 @@ Route::middleware('auth:api')->group(function (): void {
     Route::get('/watchlist', [WatchlistController::class, 'index']);
     Route::post('/watchlist', [WatchlistController::class, 'store']);
     Route::delete('/watchlist/{movieId}', [WatchlistController::class, 'destroy'])->whereNumber('movieId');
+
+    Route::get('/watched', [WatchedController::class, 'index']);
+    Route::post('/watched', [WatchedController::class, 'store']);
 });
