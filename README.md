@@ -24,6 +24,7 @@ movie-watchlist-starter/
 │   ├── index.html      # Frontend Letterboxd-style SPA (Zero-build Tailwind)
 │   ├── app.js          # Client logic & API caller
 │   └── README.md       # Panduan menjalankan frontend
+├── movie-backend/      # Implementasi Backend REST API (Laravel + JWT + Gemini) — lihat movie-backend/README.md
 └── README.md           # Panduan penugasan & spesifikasi API
 ```
 

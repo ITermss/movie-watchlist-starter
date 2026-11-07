@@ -1,0 +1,66 @@
+// FilmLog — Movie Watchlist & Review Platform ERD
+// Paste this file into https://dbdiagram.io/d to generate the interactive ERD diagram.
+
+Project FilmLog {
+  database_type: 'SQLite / PostgreSQL'
+  Note: 'GDGoC UGM 26/27 Backend Recruitment Task — FilmLog REST API'
+}
+
+Table users {
+  id bigint [pk, increment]
+  username varchar(50) [not null, note: 'Display name (non-unique)']
+  email varchar(255) [not null, unique, note: 'Login credential']
+  email_verified_at timestamp [null]
+  password varchar(255) [not null, note: 'Bcrypt hashed password']
+  remember_token varchar(100) [null]
+  created_at timestamp [null]
+  updated_at timestamp [null]
+}
+
+Table movies {
+  id bigint [pk, increment, note: 'Curated IDs 1-20 seeded from movies.json']
+  title varchar(255) [not null]
+  year smallint [not null]
+  director varchar(255) [not null]
+  genres json [not null, note: 'JSON array of strings, e.g. ["Sci-Fi", "Action"]']
+  rating decimal(3,1) [not null, note: 'IMDb/global rating (0.0 - 10.0)']
+  duration varchar(50) [not null, note: 'e.g. "148 min"']
+  synopsis text [not null]
+  poster_url text [not null]
+  cast_members json [not null, note: 'JSON array of strings; mapped as "cast" in API Resource']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  Indexes {
+    title [name: 'movies_title_index']
+    year [name: 'movies_year_index']
+  }
+}
+
+Table watchlists {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id, note: 'ON DELETE CASCADE']
+  movie_id bigint [not null, ref: > movies.id, note: 'ON DELETE CASCADE']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  Indexes {
+    movie_id [name: 'watchlists_movie_id_index']
+    (user_id, movie_id) [unique, name: 'watchlists_user_id_movie_id_unique']
+  }
+}
+
+Table reviews {
+  id bigint [pk, increment]
+  user_id bigint [not null, ref: > users.id, note: 'ON DELETE CASCADE']
+  movie_id bigint [not null, ref: > movies.id, note: 'ON DELETE CASCADE']
+  rating tinyint [not null, note: 'User rating scale 1 to 5']
+  review text [not null, note: 'User review/opinion up to 2000 characters']
+  created_at timestamp [null]
+  updated_at timestamp [null]
+
+  Indexes {
+    movie_id [name: 'reviews_movie_id_index']
+    (user_id, movie_id) [unique, name: 'reviews_user_id_movie_id_unique']
+  }
+}

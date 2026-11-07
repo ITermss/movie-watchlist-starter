@@ -1,58 +1,189 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# FilmLog Backend API (Laravel)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Layanan RESTful API untuk **FilmLog (Movie Watchlist & Review Platform)** — Tugas Rekrutmen Back-End GDGoC UGM 26/27. Dibangun menggunakan **Laravel 13 (PHP 8.3+)**, autentikasi stateless **JWT (`php-open-source-saver/jwt-auth`)**, **SQLite / PostgreSQL**, dan integrasi **Google Gemini API** dengan strategi *database grounding* berlapis.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📋 Prasyarat (Prerequisites)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+Pastikan perangkat Anda telah terinstal:
+- **PHP** >= 8.3 (direkomendasikan PHP 8.3 / 8.4 / 8.5 dengan ekstensi `pdo_sqlite`, `mbstring`, `openssl`, `curl`)
+- **Composer** >= 2.x
+- **Python 3** (opsional, untuk menjalankan static server `frontend/`)
+- **Google Gemini API Key** (dapatkan gratis melalui [Google AI Studio](https://aistudio.google.com/app/apikey))
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## 🚀 Panduan Instalasi & Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+1. **Masuk ke direktori backend:**
+   ```bash
+   cd movie-backend
+   ```
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **Instal dependensi PHP melalui Composer:**
+   ```bash
+   composer install
+   ```
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+3. **Salin file environment `.env.example` menjadi `.env`:**
+   ```bash
+   cp .env.example .env
+   ```
+   *(Di Windows PowerShell: `Copy-Item .env.example .env`)*
 
-## Agentic Development
+4. **Generate Application Key dan JWT Secret:**
+   ```bash
+   php artisan key:generate
+   php artisan jwt:secret
+   ```
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+5. **Atur konfigurasi di dalam file `.env`:**
+   Pastikan variabel berikut terisi di `.env`:
+   ```env
+   DB_CONNECTION=sqlite
 
-```bash
-composer require laravel/boost --dev
+   AUTH_GUARD=api
+   JWT_TTL=1440
 
-php artisan boost:install
+   GEMINI_API_KEY=AIzaSy...isi_api_key_anda_di_sini
+   GEMINI_MODEL=gemini-3.5-flash
+   ```
+
+6. **Siapkan file database SQLite dan jalankan migrasi beserta seeder (20 film awal):**
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate:fresh --seed
+   ```
+   *(Di Windows PowerShell jika file belum ada: `New-Item -ItemType File -Force database/database.sqlite`)*
+
+---
+
+## ▶️ Cara Menjalankan Aplikasi
+
+1. **Jalankan server backend Laravel (Port 8000):**
+   ```bash
+   php artisan serve --port=8000
+   ```
+   API akan aktif di `http://localhost:8000/api`.
+
+2. **Jalankan Frontend Companion (Port 3000) di terminal terpisah:**
+   ```bash
+   cd ../frontend
+   python -m http.server 3000 --bind 127.0.0.1
+   ```
+   Buka `http://localhost:3000` di browser untuk menguji seluruh fitur secara visual dan memantau request melalui **API Network Inspector**.
+
+---
+
+## 📡 Daftar Endpoint & Kontrak API
+
+Semua endpoint menggunakan prefix `/api`. Seluruh respons error selalu berbentuk JSON dengan properti `{"message": "..."}`.
+
+### 1. Autentikasi (`Public`)
+| Method | Endpoint | Body Request | Status Code | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `POST` | `/api/auth/register` | `{ "username", "email", "password" }` | `201`, `422` | Registrasi akun baru (`username` maks 50 karakter, `email` unik, `password` min 8 karakter di-hash dengan bcrypt). Mengembalikan `{ message, user }`. |
+| `POST` | `/api/auth/login` | `{ "email", "password" }` | `200`, `401`, `422` | Login pengguna dan mengembalikan `{ token, user: { id, username, email } }`. |
+
+### 2. Katalog Film & Rekomendasi AI (`Public`)
+| Method | Endpoint | Query / Body | Status Code | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/movies` | `?genre=`, `?search=`, `?random=true` | `200` | Mengembalikan array daftar film beserta filter opsional berdasarkan genre, judul/sutradara, atau urutan acak. |
+| `GET` | `/api/movies/{id}` | - | `200`, `404` | Mengembalikan detail satu objek film berdasarkan ID. |
+| `POST` | `/api/movies/recommend` | `{ "prompt": "..." }` | `200`, `422`, `429`, `502`, `503`, `504` | Rekomendasi 1 film dari katalog database menggunakan Google Gemini (`{ movie_id, reasoning }`). Dilindungi *rate limiter* `throttle:10,1` (10 req/menit). |
+
+### 3. Watchlist (`Protected` — Header `Authorization: Bearer <token>`)
+| Method | Endpoint | Body Request | Status Code | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/watchlist` | - | `200`, `401` | Mengambil daftar film di watchlist milik user yang sedang login (`[{ movie_id, movie, created_at }]`). |
+| `POST` | `/api/watchlist` | `{ "movieId": 1 }` | `201`, `401`, `404`, `409`, `422` | Menambahkan film ke watchlist. Mengembalikan `409 Conflict` jika film sudah ada di watchlist user. |
+| `DELETE` | `/api/watchlist/{movieId}` | - | `200`, `401`, `404` | Menghapus film dari watchlist user yang sedang login. |
+
+### 4. Watched & Reviews (`Protected` — Header `Authorization: Bearer <token>`)
+| Method | Endpoint | Body Request | Status Code | Deskripsi |
+| :--- | :--- | :--- | :--- | :--- |
+| `GET` | `/api/watched` | - | `200`, `401` | Mengambil riwayat film yang sudah ditonton beserta rating & review milik user (`[{ id, movie_id, rating, review, created_at, movie }]`). |
+| `POST` | `/api/watched` | `{ "movieId": 1, "rating": 5, "review": "..." }` | `201`, `200`, `401`, `404`, `422` | Mencatat atau memperbarui rating (`1-5`) dan ulasan film (maks 2000 karakter). Mengembalikan `201 Created` untuk ulasan baru atau `200 OK` jika memperbarui ulasan yang sudah ada. |
+
+---
+
+## 🗄️ Skema Database & ERD
+
+File definisi Entity-Relationship Diagram (DBML) tersedia di [`docs/erd.dbml`](docs/erd.dbml) dan dapat divisualisasikan langsung di [dbdiagram.io](https://dbdiagram.io/d).
+
+```mermaid
+erDiagram
+    users ||--o{ watchlists : "has many"
+    users ||--o{ reviews : "writes"
+    movies ||--o{ watchlists : "included in"
+    movies ||--o{ reviews : "reviewed in"
+
+    users {
+        bigint id PK
+        varchar username
+        varchar email UK
+        varchar password
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    movies {
+        bigint id PK
+        varchar title
+        smallint year
+        varchar director
+        json genres
+        decimal rating
+        varchar duration
+        text synopsis
+        text poster_url
+        json cast_members
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    watchlists {
+        bigint id PK
+        bigint user_id FK
+        bigint movie_id FK
+        timestamp created_at
+        timestamp updated_at
+    }
+
+    reviews {
+        bigint id PK
+        bigint user_id FK
+        bigint movie_id FK
+        tinyint rating
+        text review
+        timestamp created_at
+        timestamp updated_at
+    }
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### Keputusan Desain Utama:
+1. **Integritas Relasional & Anti-Duplikasi**: Tabel `watchlists` dan `reviews` menggunakan *foreign key* dengan `ON DELETE CASCADE` serta *composite unique constraint* `UNIQUE(user_id, movie_id)` di level database untuk mencegah duplikasi data sekalipun terjadi *race condition*.
+2. **Keamanan & Isolasi Data (*Data Scoping*)**: Seluruh operasi baca/tulis pada `watchlists` dan `reviews` selalu di-*scope* ke `$request->user()->id` dari payload JWT yang terverifikasi. ID pengguna tidak pernah diterima dari body/query request (mencegah celah IDOR).
+3. **Strategi *Database Grounding* Gemini**:
+   - Menyuntikkan katalog film dari database lokal ke dalam `<movie_catalog>` di `systemInstruction`.
+   - Mengisolasi input pengguna di dalam tag `<user_preferences>` sebagai data untuk memitigasi *prompt injection*.
+   - Memaksa output JSON terstruktur melalui `responseMimeType: application/json` dan `responseJsonSchema` (`movie_id` integer & `reasoning` string).
+   - Melakukan validasi pasca-respons (`in_array($movieId, $validIds, true)`) di kode PHP dengan mekanisme *auto-retry* 1 kali apabila LLM mengembalikan ID di luar katalog.
 
-## Contributing
+---
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## 🧪 Pengujian Otomatis (Automated Tests)
 
-## Code of Conduct
+Jalankan rangkaian *feature test* PHPUnit (menggunakan SQLite `:memory:` sehingga aman bagi data lokal Anda):
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan test
+```
 
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Skenario yang diuji di `tests/Feature/WatchlistApiTest.php`:
+- Akses rute terproteksi (`/api/watchlist` & `/api/watched`) tanpa token menghasilkan `401 Unauthorized` JSON meskipun tanpa header `Accept: application/json`.
+- Menambahkan film duplikat ke watchlist menghasilkan `409 Conflict`.
+- Mengirim rating review di luar rentang 1–5 (mis. `9` atau `0`) menghasilkan `422 Unprocessable Content`.
+- Isolasi data antar pengguna (User B tidak dapat melihat atau menghapus watchlist User A).
+- Validasi pasca-respons dan mekanisme *retry* pada `GeminiRecommender` ketika respons pertama mengembalikan `movie_id` di luar katalog database.
