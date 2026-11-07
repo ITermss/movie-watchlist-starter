@@ -19,7 +19,7 @@ class GeminiRecommender
     public function recommend(string $userPrompt): array
     {
         $apiKey = (string) config('services.gemini.api_key');
-        $model = (string) config('services.gemini.model', 'gemini-2.5-flash');
+        $model = (string) config('services.gemini.model', 'gemini-3.5-flash');
 
         if (trim($apiKey) === '') {
             throw new HttpException(500, 'Konfigurasi GEMINI_API_KEY belum diatur di server.');
@@ -135,7 +135,7 @@ PROMPT;
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent";
 
         try {
-            $response = Http::timeout(15)
+            $response = Http::timeout(30)
                 ->withHeaders([
                     'x-goog-api-key' => $apiKey,
                     'Content-Type' => 'application/json',
@@ -156,6 +156,9 @@ PROMPT;
                     ],
                     'generationConfig' => [
                         'temperature' => 0.4,
+                        'thinkingConfig' => [
+                            'thinkingBudget' => 0,
+                        ],
                         'responseMimeType' => 'application/json',
                         'responseJsonSchema' => [
                             'type' => 'object',
