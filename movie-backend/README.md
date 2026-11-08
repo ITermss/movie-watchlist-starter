@@ -76,6 +76,17 @@ Pastikan perangkat Anda telah terinstal:
 
 ---
 
+## Dokumentasi API (Postman)
+
+- **Dokumentasi online:** https://documenter.getpostman.com/view/58696710/2sBYHYuJEJ
+- **File collection (untuk di-import):** [`docs/movie-watchlist-api.postman_collection.json`](docs/movie-watchlist-api.postman_collection.json)
+
+Cara memakai file collection:
+1. Postman → **Import** → pilih file tersebut.
+2. Pastikan variabel `base_url` mengarah ke server (default `http://localhost:8000/api`).
+3. Jalankan **Daftar Akun Baru**, lalu **Masuk dan Dapatkan Token**. Token tersimpan otomatis.
+4. Jalankan request lainnya. Tiap request punya deskripsi dan contoh respons sukses maupun error.
+
 ## 📡 Daftar Endpoint & Kontrak API
 
 Semua endpoint menggunakan prefix `/api`. Seluruh respons error selalu berbentuk JSON dengan properti `{"message": "..."}`.

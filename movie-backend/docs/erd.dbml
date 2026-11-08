@@ -64,3 +64,4 @@ Table reviews {
     (user_id, movie_id) [unique, name: 'reviews_user_id_movie_id_unique']
   }
 }
+
