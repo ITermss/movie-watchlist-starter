@@ -198,3 +198,32 @@ Skenario yang diuji di `tests/Feature/WatchlistApiTest.php`:
 - Mengirim rating review di luar rentang 1–5 (mis. `9` atau `0`) menghasilkan `422 Unprocessable Content`.
 - Isolasi data antar pengguna (User B tidak dapat melihat atau menghapus watchlist User A).
 - Validasi pasca-respons dan mekanisme *retry* pada `GeminiRecommender` ketika respons pertama mengembalikan `movie_id` di luar katalog database.
+
+---
+
+## ☁️ Deployment ke Vercel / Cloud (Bonus)
+
+Proyek ini telah dilengkapi konfigurasi siap pakai untuk *serverless deployment* di **Vercel** (`vercel.json`, `api/index.php`, `.vercelignore`) maupun *container deployment* berbasis **FrankenPHP** (`Dockerfile` & `Caddyfile`).
+
+### Langkah Deploy ke Vercel:
+1. Buat database PostgreSQL/MySQL online gratis (misalnya di **Neon.tech**, **Supabase**, atau **Aiven**).
+2. Import repositori GitHub Anda ke dashboard [Vercel](https://vercel.com/new) dan atur **Root Directory** ke `movie-backend`.
+3. Tambahkan **Environment Variables** berikut di dashboard Vercel:
+   ```env
+   APP_KEY=base64:...               # Salin dari .env lokal Anda
+   JWT_SECRET=...                   # Salin dari .env lokal Anda
+   GEMINI_API_KEY=AIzaSy...         # API Key Google Gemini Anda
+   GEMINI_MODEL=gemini-3.5-flash
+
+   DB_CONNECTION=pgsql              # Atau mysql
+   DB_HOST=...
+   DB_PORT=5432
+   DB_DATABASE=...
+   DB_USERNAME=...
+   DB_PASSWORD=...
+   ```
+4. Jalankan migrasi dan seeder dari komputer lokal Anda dengan mengarahkan koneksi ke database online tersebut satu kali:
+   ```bash
+   php artisan migrate:fresh --seed --force
+   ```
+5. Klik **Deploy** di Vercel. Setelah selesai, masukkan URL Vercel Anda (`https://nama-app.vercel.app/api`) pada tombol pengaturan API di pojok kanan atas Frontend Companion.
