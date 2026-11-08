@@ -264,7 +264,7 @@ Skenario yang diuji di `tests/Feature/WatchlistApiTest.php`:
 
 ---
 
-## ☁️ Deployment ke Vercel / Cloud (Bonus)
+## ☁️ Deployment ke Vercel / Cloud 
 
 Proyek ini dilengkapi konfigurasi untuk *serverless deployment* di **Vercel** (`vercel.json`, `api/index.php`, `.vercelignore`) maupun *container deployment* berbasis **FrankenPHP** (`Dockerfile` & `Caddyfile`).
 
