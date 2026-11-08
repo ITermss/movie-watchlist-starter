@@ -8,8 +8,8 @@ Layanan **RESTful API** untuk **FilmLog (Movie Watchlist & Review Platform)** �
 
 | | Tautan |
 | :--- | :--- |
-| 🌐 **Live Deployment (API)** | <ISI_URL_DEPLOY_VERCEL> |
-| 📘 **Dokumentasi API (Postman, online)** | https://documenter.getpostman.com/view/58696710/2sBYHYuJEJ |
+| 🌐 **Live Deployment (API)** | https://filmlog-backend-self.vercel.app/|
+| 📘 **Dokumentasi API (Postman)**| https://documenter.getpostman.com/view/58696710/2sBYHYuJEJ |
 | 📦 **File Postman Collection (untuk di-import)** | [`movie-backend/docs/movie-watchlist-api.postman_collection.json`](movie-backend/docs/movie-watchlist-api.postman_collection.json) |
 | 🗄️ **ERD (DBML)** | [`movie-backend/docs/erd.dbml`](movie-backend/docs/erd.dbml) (visualisasikan di [dbdiagram.io](https://dbdiagram.io/d)) |
 
