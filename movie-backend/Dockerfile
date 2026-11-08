@@ -24,3 +24,4 @@ RUN composer dump-autoload --optimize --no-dev \
 EXPOSE 8000
 
 CMD ["frankenphp", "run", "--config", "/app/Caddyfile"]
+
