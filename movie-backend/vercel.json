@@ -1,10 +1,11 @@
 {
     "version": 2,
     "framework": null,
+    "buildCommand": "",
     "outputDirectory": "public",
     "functions": {
         "api/index.php": {
-            "runtime": "vercel-php@0.7.3"
+            "runtime": "vercel-php@0.9.0"
         }
     },
     "routes": [
@@ -42,4 +43,3 @@
         "GEMINI_MODEL": "gemini-3.5-flash"
     }
 }
-
