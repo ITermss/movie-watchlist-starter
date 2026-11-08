@@ -14,5 +14,9 @@ foreach ([
     }
 }
 
-require __DIR__.'/../public/index.php';
+// Prevent Symfony Request from stripping the '/api' prefix when script is at /api/index.php
+$_SERVER['SCRIPT_NAME'] = '/index.php';
+$_SERVER['SCRIPT_FILENAME'] = __DIR__.'/../public/index.php';
+$_SERVER['PHP_SELF'] = '/index.php';
 
+require __DIR__.'/../public/index.php';
