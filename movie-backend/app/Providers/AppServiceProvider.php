@@ -16,7 +16,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $dbUrl = config('database.connections.pgsql.url') ?: env('DB_URL');
+
+        if (is_string($dbUrl) && str_contains($dbUrl, '.neon.tech')) {
+            $parsed = parse_url($dbUrl);
+            $host = $parsed['host'] ?? '';
+            $firstLabel = explode('.', $host)[0];
+            $endpointId = preg_replace('/-pooler$/', '', $firstLabel);
+
+            config([
+                'database.connections.pgsql.url' => null,
+                'database.connections.pgsql.host' => $host,
+                'database.connections.pgsql.port' => $parsed['port'] ?? 5432,
+                'database.connections.pgsql.database' => isset($parsed['path']) ? ltrim($parsed['path'], '/') : 'neondb',
+                'database.connections.pgsql.username' => $parsed['user'] ?? '',
+                'database.connections.pgsql.password' => $parsed['pass'] ?? '',
+                'database.connections.pgsql.sslmode' => "require;options='endpoint={$endpointId}'",
+            ]);
+        }
     }
 
     /**
